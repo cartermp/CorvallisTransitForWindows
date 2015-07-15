@@ -2,6 +2,5 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/CorvallisTransitForWindows
 /.vs/CorvallisTransitForWindows/v14
 /.vs/config
