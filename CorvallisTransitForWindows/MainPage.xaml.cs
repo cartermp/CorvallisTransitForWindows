@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
+using Windows.System;
 using Windows.UI;
 using Windows.UI.Notifications;
 using Windows.UI.Xaml;
@@ -265,12 +266,20 @@ namespace CorvallisTransitForWindows
 
                     arrivalsTask.Wait();
                     var arrivals = arrivalsTask.Result;
-                                        
+
                     toastTextElements[0].AppendChild(toastXml.CreateTextNode("Expected: " + arrivals.First().Expected.ToString("t")));
 
                     ToastNotificationManager.CreateToastNotifier().Show(new ToastNotification(toastXml));
+                    GetDirectionsFromBing(stop);
                 }
             }
+        }
+
+        private static void GetDirectionsFromBing(Stop stop)
+        {
+            string uriToLaunch = string.Format("ms-walk-to:?destination.latitude={0}&destination.longitude={1}",
+                                                                    stop.Lat, stop.Long);
+            Task.Run(() => Launcher.LaunchUriAsync(new Uri(uriToLaunch)));
         }
 
         /// <summary>
@@ -293,7 +302,7 @@ namespace CorvallisTransitForWindows
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)
         {
-            return Math.Abs(s.Lat -  location.Position.Latitude)  < 0.0001 &&
+            return Math.Abs(s.Lat - location.Position.Latitude) < 0.0001 &&
                    Math.Abs(s.Long - location.Position.Longitude) < 0.0001;
         }
 
