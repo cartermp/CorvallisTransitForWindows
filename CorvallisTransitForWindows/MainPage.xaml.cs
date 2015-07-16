@@ -24,8 +24,6 @@ namespace CorvallisTransitForWindows
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public static MainPage Current = null;
-
         private static int routeIndexClicked;
 
         private static string ROUTES_URL = "http://www.corvallis-bus.appspot.com/routes";
@@ -49,9 +47,7 @@ namespace CorvallisTransitForWindows
             {
                 route.PolyLinePositions = PolylineToLocations(route.Polyline);
                 route.Label = "Route " + route.Name;
-
-                // Figure out a unique Symbol?
-                route.Symbol = Symbol.More;
+                route.ShortLabel = route.Name;
             }
 
             NavMenuList.ItemsSource = routes;
@@ -277,7 +273,7 @@ namespace CorvallisTransitForWindows
                 var stop = route.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
                 if (stop != null)
                 {
-                    // do something
+                    // do something i guess
                 }
             }
         }
