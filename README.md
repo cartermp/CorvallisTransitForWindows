@@ -37,4 +37,4 @@ View when selecting a route (in this case, Route 3):
 
 - Toast Notification for expected arrival of selected route to selected stop
 
-- Walking directions to selected stop
+- Walking directions to selected stop (via Maps app)
