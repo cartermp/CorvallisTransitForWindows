@@ -19,8 +19,8 @@ This code probably has some bugs and is absolutely *not* feature-complete nor pr
 
 View when the app first opens:
 
-![text](/Assets/CorvallisTransitOverall.png)
+![overall](CorvallisTransitForWindows/Assets/CorvallisTransitOverall.png)
 
 View when selecting a route (in this case, Route 3):
 
-![text](/Assets/CorvallisTransitRoute3.png])
+![route 3](CorvallisTransitForWindows/Assets/CorvallisTransitRoute3.png])
