@@ -21,6 +21,10 @@ View when the app first opens:
 
 ![overall](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitOverall.PNG)
 
+Or in "phone" view:
+
+![phone view](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitPhoneView.PNG)
+
 View when selecting a route (in this case, Route 3):
 
 ![route 3](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute3.PNG)
