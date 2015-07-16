@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\CorvallisTransitOverall.PNG" />
+    <Content Include="Assets\CorvallisTransitPhoneView.PNG" />
     <Content Include="Assets\CorvallisTransitRoute3.PNG" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />

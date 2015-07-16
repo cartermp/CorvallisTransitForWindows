@@ -278,7 +278,7 @@ namespace CorvallisTransitForWindows
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)
         {
-            return Math.Abs(s.Lat - location.Position.Latitude) < 0.0001 &&
+            return Math.Abs(s.Lat -  location.Position.Latitude)  < 0.0001 &&
                    Math.Abs(s.Long - location.Position.Longitude) < 0.0001;
         }
 
