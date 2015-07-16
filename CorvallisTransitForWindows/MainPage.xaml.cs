@@ -1,4 +1,5 @@
-﻿using CorvallisTransitForWindows.Model;
+﻿using CorvallisTransitForWindows.Controls;
+using CorvallisTransitForWindows.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -6,8 +7,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
+using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Maps;
 using Windows.UI.Xaml.Navigation;
@@ -21,6 +24,8 @@ namespace CorvallisTransitForWindows
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public static MainPage Current = null;
+
         private static int routeIndexClicked;
 
         private static string ROUTES_URL = "http://www.corvallis-bus.appspot.com/routes";
@@ -42,48 +47,53 @@ namespace CorvallisTransitForWindows
 
             foreach (var route in routes)
             {
-                route.DisplayName = "Route " + route.Name;
                 route.PolyLinePositions = PolylineToLocations(route.Polyline);
+                route.Label = "Route " + route.Name;
+
+                // Figure out a unique Symbol?
+                route.Symbol = Symbol.More;
             }
 
-            RoutesList.ItemsSource = routes;
+            NavMenuList.ItemsSource = routes;
         }
 
         /// <summary>
-        /// Sets the location, zooms the map, and loads up the polylines for the routes (a cosmetic feature for when it's first opened).
+        /// Enable accessibility on each nav menu item by setting the AutomationProperties.Name on each container
+        /// using the associated Label of each item.
         /// </summary>
-        private async void RouteMap_Loaded(object sender, RoutedEventArgs e)
+        private void NavMenuList_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
-            var corvallis = GetCorvallisLocation();
-            await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Linear);
-
-            foreach (var route in RoutesList.ItemsSource as List<Route>)
+            if (!args.InRecycleQueue && args.Item != null && args.Item is NavMenuItem)
             {
-                DrawRoutePolyline(route);
+                args.ItemContainer.SetValue(AutomationProperties.NameProperty, ((NavMenuItem)args.Item).Label);
+            }
+            else
+            {
+                args.ItemContainer.ClearValue(AutomationProperties.NameProperty);
             }
         }
 
-        private Geopoint GetCorvallisLocation()
+        /// <summary>
+        /// Handles displaying a route on a map when one of the routes is clicked in the Nav Menu.
+        /// </summary>
+        private void NavMenuList_ItemInvoked(object sender, ListViewItem e)
         {
-            return new Geopoint(new BasicGeoposition() { Latitude = 44.565918, Longitude = -123.276417 });
-        }
+            var list = sender as NavMenuListView;
 
-        private void RoutesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListBox routesListBox = sender as ListBox;
-            Route route = routesListBox.SelectedItem as Route;
+            if (list == null)
+            {
+                return;
+            }
 
-            routeIndexClicked = routesListBox.SelectedIndex;
+            var route = (Route)((NavMenuListView)sender).ItemFromContainer(e);
+            routeIndexClicked = list.SelectedIndex;
 
             if (route != null && route.Path != null && route.Path.Count > 0)
             {
-                var getArrivalsTask = Task.Run(() => DetermineExpectedTimesForRoute(route));
-
                 // Clear out anything else, otherwise we end up with one ugly map.
                 RouteMap.MapElements.Clear();
-                DrawRoutePolyline(route);
 
-                getArrivalsTask.Wait();
+                DrawRoutePolyline(route);
 
                 var basicGeo = new BasicGeoposition()
                 {
@@ -110,6 +120,25 @@ namespace CorvallisTransitForWindows
         }
 
         /// <summary>
+        /// Sets the location, zooms the map, and loads up the polylines for the routes (a cosmetic feature for when it's first opened).
+        /// </summary>
+        private async void RouteMap_Loaded(object sender, RoutedEventArgs e)
+        {
+            var corvallis = GetCorvallisLocation();
+            await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Linear);
+
+            foreach (var route in NavMenuList.ItemsSource as List<Route>)
+            {
+                DrawRoutePolyline(route);
+            }
+        }
+
+        private Geopoint GetCorvallisLocation()
+        {
+            return new Geopoint(new BasicGeoposition() { Latitude = 44.565918, Longitude = -123.276417 });
+        }
+
+        /// <summary>
         /// Draws the route's GoogleMaps polyline on the map.
         /// </summary>
         private void DrawRoutePolyline(Route route)
@@ -128,36 +157,6 @@ namespace CorvallisTransitForWindows
             polyLine.StrokeThickness = 5;
 
             RouteMap.MapElements.Add(polyLine);
-        }
-
-        /// <summary>
-        /// Gets arrival data for each stop in a given route.
-        /// </summary>
-        private void DetermineExpectedTimesForRoute(Route route)
-        {
-            Parallel.ForEach(route.Path, stop =>
-            {
-                var arrivalsTask = Task.Run(() => GetArrivalsAsync(stop.Id));
-                arrivalsTask.Wait();
-
-                // Because the server returns arrivals irrespective of route,
-                // we need to filer the list down to the route we care about,
-                // then take the first item in the list, as that is the arrival we care about.
-                var arrival = arrivalsTask.Result.Where(a => a.Route == route.Name)
-                              .OrderBy(a => a.Expected)
-                              .FirstOrDefault();
-
-                if (arrival == null)
-                {
-                    stop.ExpectedTime = DateTime.MinValue;
-                }
-                else
-                {
-                    stop.ExpectedTime = arrival.Expected;
-                }
-            });
-
-            route.Path = route.Path.Where(s => s.ExpectedTime != DateTime.MinValue).ToList();
         }
 
         /// <summary>
@@ -263,34 +262,80 @@ namespace CorvallisTransitForWindows
             return poly;
         }
 
-        /// <summary>
-        /// Handles toggling the pane of the Master/Detail view.
-        /// </summary>
-        private void ToggleButton_Click(object sender, RoutedEventArgs e)
-        {
-            MasterDetail.IsPaneOpen = !MasterDetail.IsPaneOpen;
-            // possible do more here
-        }
-
         private void RouteMap_MapElementClick(MapControl sender, MapElementClickEventArgs args)
         {
-            // TODO: Understand why this fails
-            //var route = RoutesList.SelectedItems[routeIndexClicked] as Route;
+            // Just ignore anything that isn't a stop marker.
+            if (!args.MapElements.Any(me => me is MapIcon))
+            {
+                return;
+            }
 
-            //if (route != null)
-            //{
-            //    var stop = route.Path.SingleOrDefault(s => AreLocationsTheSame(s, args.Location));
-            //    if (stop != null)
-            //    {
-            //        // do something
-            //    }
-            //}
+            var route = NavMenuList.SelectedItems[routeIndexClicked] as Route;
+
+            if (route != null)
+            {
+                var stop = route.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
+                if (stop != null)
+                {
+                    // do something
+                }
+            }
         }
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)
         {
-            return Math.Abs(s.Lat - location.Position.Latitude) >= 0.000001 &&
-                   Math.Abs(s.Long - location.Position.Longitude) >= 0.000001;
+            return Math.Abs(s.Lat - location.Position.Latitude) < 0.0001 &&
+                   Math.Abs(s.Long - location.Position.Longitude) < 0.0001;
         }
+
+        #region Hamburger Button Display Logic
+
+        public Rect TogglePaneButtonRect
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Callback when the SplitView's Pane is toggled open or close.  When the Pane is not visible
+        /// then the floating hamburger may be occluding other content in the app unless it is aware.
+        /// </summary>
+        private void TogglePaneButton_Checked(object sender, RoutedEventArgs e)
+        {
+            this.CheckTogglePaneButtonSizeChanged();
+        }
+
+        /// <summary>
+        /// An event to notify listeners when the hamburger button may occlude other content in the app.
+        /// The custom "PageHeader" user control is using this.
+        /// </summary>
+        public event TypedEventHandler<MainPage, Rect> TogglePaneButtonRectChanged;
+
+        /// <summary>
+        /// Check for the conditions where the navigation pane does not occupy the space under the floating
+        /// hamburger button and trigger the event.
+        /// </summary>
+        private void CheckTogglePaneButtonSizeChanged()
+        {
+            if (this.RootSplitView.DisplayMode == SplitViewDisplayMode.Inline ||
+                this.RootSplitView.DisplayMode == SplitViewDisplayMode.Overlay)
+            {
+                var transform = this.TogglePaneButton.TransformToVisual(this);
+                var rect = transform.TransformBounds(new Rect(0, 0, this.TogglePaneButton.ActualWidth, this.TogglePaneButton.ActualHeight));
+                this.TogglePaneButtonRect = rect;
+            }
+            else
+            {
+                this.TogglePaneButtonRect = new Rect();
+            }
+
+            var handler = this.TogglePaneButtonRectChanged;
+            if (handler != null)
+            {
+                handler(this, this.TogglePaneButtonRect);
+            }
+        }
+
+        #endregion
     }
 }

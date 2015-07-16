@@ -5,42 +5,83 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:Maps="using:Windows.UI.Xaml.Controls.Maps"
+    xmlns:controls="using:CorvallisTransitForWindows.Controls"
     x:Class="CorvallisTransitForWindows.MainPage"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="RootLayout">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Page.Resources>
+        <DataTemplate x:Key="NavMenuItemTemplate" x:DataType="local:NavMenuItem">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <!-- Showing a ToolTip and the Label is redundant.  We put the ToolTip on the icon.
+                     It appears when the user hovers over the icon, but not the label which provides
+                     value when the SplitView is 'Compact' while reducing the likelihood of showing
+                     redundant information when the label is shown.-->
+                <FontIcon x:Name="Glyph" FontSize="16" Glyph="{x:Bind SymbolAsChar}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{x:Bind Label}"/>
+                <TextBlock x:Name="Text" Grid.Column="1" Text="{x:Bind Label}" />
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
 
-        <SplitView x:Name="MasterDetail" IsPaneOpen="True" Grid.Column="1" Grid.Row="1" DisplayMode="Inline" Margin="0,0,0,0">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="RootLayout">
+
+        <!-- Adaptive Triggers to allow for proper resizing depending on screen size. -->
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <!-- Non-phone screen size. -->
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="720" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="RootSplitView.DisplayMode" Value="CompactInline" />
+                        <Setter Target="RootSplitView.IsPaneOpen" Value="True" />
+                    </VisualState.Setters>
+                </VisualState>
+
+                <!-- Phone screen size. -->
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="RootSplitView.DisplayMode" Value="Overlay" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <!-- The Top-level nav menu and content. -->
+        <SplitView x:Name="RootSplitView" 
+                   DisplayMode="Inline"
+                   OpenPaneLength="256"
+                   IsTabStop="false">
+
+            <!-- The actual nav menu. Filled dynamically by service call. -->
             <SplitView.Pane>
-                <RelativePanel Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
-                    <TextBlock x:Name="Title" Text="Routes" Style="{StaticResource RouteTitleStyle}" TextWrapping="Wrap" Margin="0,10,0,0"/>
-                    <ListBox x:Name="RoutesList" RelativePanel.Below="Title"
-				             SelectionMode="Single" HorizontalAlignment="Left" Style="{StaticResource RoutesListStyle}"
-				             VerticalAlignment="Top" SelectionChanged="RoutesList_SelectionChanged" Grid.RowSpan="2" Margin="0,10,0,0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding DisplayName}" Style="{StaticResource RoutesListItemTextStyle}"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </RelativePanel>
+                <controls:NavMenuListView x:Name="NavMenuList"
+                                          TabIndex="3"
+                                          Margin="0,48,0,0"
+                                          ContainerContentChanging="NavMenuList_ContainerContentChanging"
+                                          ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
+                                          ItemTemplate="{StaticResource NavMenuItemTemplate}"
+                                          ItemInvoked="NavMenuList_ItemInvoked" />
             </SplitView.Pane>
+
+            <!-- The content the user actually interacts with. -->
             <Maps:MapControl x:Name="RouteMap" Loaded="RouteMap_Loaded" MapElementClick="RouteMap_MapElementClick" Grid.ColumnSpan="2"/>
         </SplitView>
 
-        <StackPanel x:Name="HeaderPanel" Orientation="Horizontal">
-            <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Grid.Row="0">
-                <ToggleButton Style="{StaticResource SymbolButton}" Click="ToggleButton_Click" VerticalAlignment="Top" Foreground="{ThemeResource ApplicationForegroundThemeBrush}">
-                    <ToggleButton.Content>
-                        <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0"/>
-                    </ToggleButton.Content>
-                </ToggleButton>
-            </Border>
-            <TextBlock x:Name="Header" Text="Corvallis Transit for Windows (Phillip's Learning)" Style="{StaticResource TagLineTextStyle}"/>
-        </StackPanel>
+        <!-- Declared last so that it is rendered above everything else.  Needs to be the first item in the tab sequence. -->
+        <ToggleButton x:Name="TogglePaneButton"
+                      TabIndex="1"
+                      Style="{StaticResource SplitViewTogglePaneButtonStyle}"
+                      IsChecked="{Binding IsPaneOpen, ElementName=RootSplitView, Mode=TwoWay}"
+                      Checked="TogglePaneButton_Checked"
+                      AutomationProperties.Name="Menu"
+                      ToolTipService.ToolTip="Menu" />
     </Grid>
 </Page>

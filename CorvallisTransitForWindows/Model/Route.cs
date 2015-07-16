@@ -7,7 +7,7 @@ namespace CorvallisTransitForWindows.Model
     /// <summary>
     /// Represents the route a CTS bus travels on.
     /// </summary>
-    public class Route
+    public class Route : NavMenuItem
     {
         /// <summary>
         /// Name of the route (1, 2, C#, etc).
