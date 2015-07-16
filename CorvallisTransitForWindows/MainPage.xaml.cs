@@ -24,7 +24,7 @@ namespace CorvallisTransitForWindows
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private static int routeIndexClicked;
+        private static Route SelectedRoute;
 
         private static string ROUTES_URL = "http://www.corvallis-bus.appspot.com/routes";
         private static string ARRIVALS_URL = "http://www.corvallis-bus.appspot.com/arrivals?stops=";
@@ -82,7 +82,7 @@ namespace CorvallisTransitForWindows
             }
 
             var route = (Route)((NavMenuListView)sender).ItemFromContainer(e);
-            routeIndexClicked = list.SelectedIndex;
+            SelectedRoute = route;
 
             if (route != null && route.Path != null && route.Path.Count > 0)
             {
@@ -266,11 +266,9 @@ namespace CorvallisTransitForWindows
                 return;
             }
 
-            var route = NavMenuList.SelectedItems[routeIndexClicked] as Route;
-
-            if (route != null)
+            if (SelectedRoute != null)
             {
-                var stop = route.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
+                var stop = SelectedRoute.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
                 if (stop != null)
                 {
                     // do something i guess
