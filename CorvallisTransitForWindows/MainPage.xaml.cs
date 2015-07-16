@@ -53,7 +53,7 @@ namespace CorvallisTransitForWindows
         private async void RouteMap_Loaded(object sender, RoutedEventArgs e)
         {
             var corvallis = GetCorvallisLocation();
-            await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Default);
+            await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Linear);
 
             foreach (var route in RoutesList.ItemsSource as List<Route>)
             {
@@ -88,6 +88,20 @@ namespace CorvallisTransitForWindows
                 };
 
                 Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(basicGeo), 20, 0, 0, MapAnimationKind.Bow));
+
+                foreach (var stop in route.Path)
+                {
+                    var pin = new MapIcon()
+                    {
+                        Location = new Geopoint(new BasicGeoposition()
+                        {
+                            Latitude = stop.Lat,
+                            Longitude = stop.Long
+                        })
+                    };
+
+                    RouteMap.MapElements.Add(pin);
+                }
             }
         }
 
