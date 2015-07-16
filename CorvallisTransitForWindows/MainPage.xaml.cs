@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Data.Xml.Dom;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
 using Windows.UI;
+using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
@@ -174,24 +176,6 @@ namespace CorvallisTransitForWindows
         }
 
         /// <summary>
-        /// Hits the Corvallis Bus server for updated arrivals for a given stop ID.
-        /// </summary>
-        private async Task<List<Arrival>> GetArrivalsAsync(int stopId)
-        {
-            var uri = new Uri(ARRIVALS_URL + stopId);
-            var response = await httpClient.GetAsync(uri);
-
-            response.EnsureSuccessStatusCode();
-
-            var text = await response.Content.ReadAsStringAsync();
-
-            text = text.Substring(9, text.Length - 10);
-
-            // As above, the async version of this is strangely deprecated.
-            return await Task.Run(() => JsonConvert.DeserializeObject<List<Arrival>>(text));
-        }
-
-        /// <summary>
         /// Converts a Google Maps polyline string into a list of Lat/Longs.
         /// 
         /// Copy-pasted from here:
@@ -268,12 +252,43 @@ namespace CorvallisTransitForWindows
 
             if (SelectedRoute != null)
             {
+                // This is highly-dependent on Zoom level.  Being zoomed out too far screws this up.
                 var stop = SelectedRoute.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
                 if (stop != null)
                 {
-                    // do something i guess
+                    var arrivalsTask = Task.Run(() => GetArrivalsAsync(stop.Id));
+
+                    ToastTemplateType type = ToastTemplateType.ToastText01;
+                    XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(type);
+
+                    var toastTextElements = toastXml.GetElementsByTagName("text");
+
+                    arrivalsTask.Wait();
+                    var arrivals = arrivalsTask.Result;
+                                        
+                    toastTextElements[0].AppendChild(toastXml.CreateTextNode("Expected: " + arrivals.First().Expected.ToString("t")));
+
+                    ToastNotificationManager.CreateToastNotifier().Show(new ToastNotification(toastXml));
                 }
             }
+        }
+
+        /// <summary>
+        /// Hits the Corvallis Bus server for updated arrivals for a given stop ID.
+        /// </summary>
+        private async Task<List<Arrival>> GetArrivalsAsync(int stopId)
+        {
+            var uri = new Uri(ARRIVALS_URL + stopId);
+            var response = await httpClient.GetAsync(uri);
+
+            response.EnsureSuccessStatusCode();
+
+            var text = await response.Content.ReadAsStringAsync();
+
+            text = text.Substring(9, text.Length - 10);
+
+            // As above, the async version of this is strangely deprecated.
+            return await Task.Run(() => JsonConvert.DeserializeObject<List<Arrival>>(text));
         }
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)
