@@ -21,6 +21,8 @@ namespace CorvallisTransitForWindows
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private static int routeIndexClicked;
+
         private static string ROUTES_URL = "http://www.corvallis-bus.appspot.com/routes";
         private static string ARRIVALS_URL = "http://www.corvallis-bus.appspot.com/arrivals?stops=";
 
@@ -71,7 +73,9 @@ namespace CorvallisTransitForWindows
             ListBox routesListBox = sender as ListBox;
             Route route = routesListBox.SelectedItem as Route;
 
-            if (route != null)
+            routeIndexClicked = routesListBox.SelectedIndex;
+
+            if (route != null && route.Path != null && route.Path.Count > 0)
             {
                 var getArrivalsTask = Task.Run(() => DetermineExpectedTimesForRoute(route));
 
@@ -266,6 +270,27 @@ namespace CorvallisTransitForWindows
         {
             MasterDetail.IsPaneOpen = !MasterDetail.IsPaneOpen;
             // possible do more here
+        }
+
+        private void RouteMap_MapElementClick(MapControl sender, MapElementClickEventArgs args)
+        {
+            // TODO: Understand why this fails
+            //var route = RoutesList.SelectedItems[routeIndexClicked] as Route;
+
+            //if (route != null)
+            //{
+            //    var stop = route.Path.SingleOrDefault(s => AreLocationsTheSame(s, args.Location));
+            //    if (stop != null)
+            //    {
+            //        // do something
+            //    }
+            //}
+        }
+
+        private bool AreLocationsTheSame(Stop s, Geopoint location)
+        {
+            return Math.Abs(s.Lat - location.Position.Latitude) >= 0.000001 &&
+                   Math.Abs(s.Long - location.Position.Longitude) >= 0.000001;
         }
     }
 }

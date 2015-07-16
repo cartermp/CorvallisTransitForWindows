@@ -29,7 +29,7 @@
                     </ListBox>
                 </RelativePanel>
             </SplitView.Pane>
-            <Maps:MapControl x:Name="RouteMap" Loaded="RouteMap_Loaded" Grid.ColumnSpan="2"/>
+            <Maps:MapControl x:Name="RouteMap" Loaded="RouteMap_Loaded" MapElementClick="RouteMap_MapElementClick" Grid.ColumnSpan="2"/>
         </SplitView>
 
         <StackPanel x:Name="HeaderPanel" Orientation="Horizontal">
