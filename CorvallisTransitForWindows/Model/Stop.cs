@@ -8,28 +8,54 @@ namespace CorvallisTransitForWindows.Model
     /// </summary>
     public class Stop
     {
+        /// <summary>
+        /// Stop name as following CTS conventions (street & cross-street).
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// The primary road the stop is located on.
+        /// </summary>
         public string Road { get; set; }
 
-        public float Breaing { get; set; }
+        /// <summary>
+        /// The bearing (as if on a map) of the stop.
+        /// </summary>
+        public float Bearing { get; set; }
 
+        /// <summary>
+        /// Whether or not a bus adheres to the scheduled time for this stop.
+        /// </summary>
         public bool AdherencePoint { get; set; }
 
+        /// <summary>
+        /// Latitude.
+        /// </summary>
         public double Lat { get; set; }
 
+        /// <summary>
+        /// Longitude.
+        /// </summary>
         public double Long { get; set; }
 
+        /// <summary>
+        /// Unique numeric ID for this stop.
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// The time one can expect a bus to arrive at this stop.  Not necessarily the scheduled time.
+        /// </summary>
         public DateTime ExpectedTime { get; set; }
 
+        /// <summary>
+        /// The time that a bus is supposed to arrive at this stop.
+        /// </summary>
         public DateTime ScheduledTime { get; set; }
 
-        public string ExpectedTimeText { get; set; }
-
-        public string ScheduledTimeText { get; set; }
-
+        /// <summary>
+        /// The number of minutes one can expect a bus to arrive at this stop.
+        /// </summary>
         public int ETA => (ExpectedTime - DateTime.Now).Minutes;
 
         /// <summary>
@@ -48,22 +74,15 @@ namespace CorvallisTransitForWindows.Model
                 }
                 else if (eta < 1 && eta >= 0)
                 {
-                    if (string.IsNullOrWhiteSpace(ExpectedTimeText))
+                    int seconds = (ExpectedTime - DateTime.Now).Seconds;
+
+                    if (seconds > 30)
                     {
-                        text = "N/A";
+                        text = seconds + "s";
                     }
                     else
                     {
-                        int seconds = (ExpectedTime - DateTime.Now).Seconds;
-
-                        if (seconds > 30)
-                        {
-                            text = seconds + "s";
-                        }
-                        else
-                        {
-                            text = "N/A";
-                        }
+                        text = "N/A";
                     }
                 }
                 else

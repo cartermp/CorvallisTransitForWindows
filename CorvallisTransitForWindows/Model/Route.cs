@@ -6,6 +6,8 @@ namespace CorvallisTransitForWindows.Model
 {
     /// <summary>
     /// Represents the route a CTS bus travels on.
+    /// 
+    /// Inherits from NavMenuItem because routes are what users will navigate with.
     /// </summary>
     public class Route : NavMenuItem
     {
@@ -24,7 +26,11 @@ namespace CorvallisTransitForWindows.Model
         /// </summary>
         public List<Stop> Path { get; set; }
 
+        /// <summary>
+        /// List of Lat/Longs which correspond to the polyline.
+        /// </summary>
         public List<BasicGeoposition> PolyLinePositions { get; set; }
+
 
         public DateTime LastStopTimeUpdated { get; set; }
 
