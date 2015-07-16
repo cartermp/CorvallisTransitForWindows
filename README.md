@@ -28,3 +28,13 @@ Or in "phone" view:
 View when selecting a route (in this case, Route 3):
 
 ![route 3](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute3.PNG)
+
+## Features (small in number as they are)
+
+- Seeing all routes on a pretty map
+
+- Seeing the route your selected and all of its stops as pins on the map
+
+- Toast Notification for expected arrival of selected route to selected stop
+
+- Walking directions to selected stop
