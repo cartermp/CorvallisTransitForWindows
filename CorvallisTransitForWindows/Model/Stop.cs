@@ -70,7 +70,7 @@ namespace CorvallisTransitForWindows.Model
 
                 if (eta > 1)
                 {
-                    text = eta + " m";
+                    text = eta + " mins";
                 }
                 else if (eta < 1 && eta >= 0)
                 {
@@ -78,7 +78,7 @@ namespace CorvallisTransitForWindows.Model
 
                     if (seconds > 30)
                     {
-                        text = seconds + "s";
+                        text = seconds + "seconds";
                     }
                     else
                     {
@@ -87,7 +87,7 @@ namespace CorvallisTransitForWindows.Model
                 }
                 else
                 {
-                    text = "P";
+                    text = "Passed Stop";
                 }
 
                 return text;

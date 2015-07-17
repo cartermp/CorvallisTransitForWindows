@@ -24,6 +24,16 @@
                 <TextBlock x:Name="Text" Grid.Column="1" Text="{x:Bind Label}" />
             </Grid>
         </DataTemplate>
+        <MenuFlyout x:Key="StopFlyout" Placement="Right">
+            <MenuFlyout.MenuFlyoutPresenterStyle>
+                <Style TargetType="MenuFlyoutPresenter">
+                    <Setter Property="BorderBrush" Value="AliceBlue"/>
+                </Style>
+            </MenuFlyout.MenuFlyoutPresenterStyle>
+            <MenuFlyoutItem x:Name="ETAItem" IsEnabled="False" />
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Text="Walking Directions" Click="DirectionsItem_Click"/>
+        </MenuFlyout>
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="RootLayout">
@@ -31,18 +41,18 @@
         <!-- Adaptive Triggers to allow for proper resizing depending on screen size. -->
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
-                <!-- Non-phone screen size. -->
+                <!-- Wide View -->
                 <VisualState>
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="720" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="RootSplitView.DisplayMode" Value="CompactInline" />
-                        <Setter Target="RootSplitView.IsPaneOpen" Value="True" />
+                        <Setter Target="RootSplitView.IsPaneOpen" Value="False" />
                     </VisualState.Setters>
                 </VisualState>
 
-                <!-- Phone screen size. -->
+                <!-- Narrow View -->
                 <VisualState>
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="0" />
@@ -72,7 +82,10 @@
             </SplitView.Pane>
 
             <Frame x:Name="ContentFrame">
-                <Maps:MapControl x:Name="RouteMap" Loaded="RouteMap_Loaded" MapElementClick="RouteMap_MapElementClick" />
+                <Maps:MapControl x:Name="RouteMap" 
+                                 Loaded="RouteMap_Loaded" 
+                                 MapElementClick="RouteMap_MapElementClick"
+                                 FlyoutBase.AttachedFlyout="{StaticResource StopFlyout}"/>
             </Frame>
 
         </SplitView>
@@ -84,6 +97,6 @@
                       IsChecked="{Binding IsPaneOpen, ElementName=RootSplitView, Mode=TwoWay}"
                       Checked="TogglePaneButton_Checked"
                       AutomationProperties.Name="Menu"
-                      ToolTipService.ToolTip="Menu" />
+                      ToolTipService.ToolTip="Menu"/>
     </Grid>
 </Page>

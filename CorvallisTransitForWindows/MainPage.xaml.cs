@@ -16,6 +16,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Maps;
+using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Navigation;
 using Windows.Web.Http;
 
@@ -29,7 +30,11 @@ namespace CorvallisTransitForWindows
     {
         public static MainPage Current;
 
+        //
+        // Yes, globals like this suck, but it's the best way (that I can figure out) to handle all these types of events.
+        //
         private static Route SelectedRoute;
+        private static Stop SelectedStop;
 
         private static string ROUTES_URL = "http://www.corvallis-bus.appspot.com/routes";
         private static string ARRIVALS_URL = "http://www.corvallis-bus.appspot.com/arrivals?stops=";
@@ -42,6 +47,9 @@ namespace CorvallisTransitForWindows
             Current = this;
         }
 
+        /// <summary>
+        /// Grabs route data from the server the instant the page is navigated to.
+        /// </summary>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             var getRoutesTask = Task.Run(() => GetRoutesAsync());
@@ -51,8 +59,13 @@ namespace CorvallisTransitForWindows
 
             foreach (var route in routes)
             {
+                if (route.Name.Contains("BB"))
+                {
+                    route.Name = route.Name.Replace("BB", "NO");
+                }
+
                 route.PolyLinePositions = PolylineToLocations(route.Polyline);
-                route.Label = "Route " + route.Name;
+                route.Label = "CTS Route " + route.Name;
                 route.ShortLabel = route.Name;
             }
 
@@ -81,13 +94,19 @@ namespace CorvallisTransitForWindows
         private void NavMenuList_ItemInvoked(object sender, ListViewItem e)
         {
             var list = sender as NavMenuListView;
-
             if (list == null)
             {
+                // Sweep this problem under the rug by failing silently.
                 return;
             }
 
-            var route = (Route)((NavMenuListView)sender).ItemFromContainer(e);
+            var route = (sender as NavMenuListView).ItemFromContainer(e) as Route;
+            if (route == null)
+            {
+                // Sweep this problem under the rug by failing silently.
+                return;
+            }
+
             SelectedRoute = route;
 
             if (route != null && route.Path != null && route.Path.Count > 0)
@@ -99,11 +118,12 @@ namespace CorvallisTransitForWindows
 
                 var basicGeo = new BasicGeoposition()
                 {
-                    Latitude = route.Path.First().Lat,
-                    Longitude = route.Path.First().Long
+                    // Best attempt to center the route on the page is to average Lat/Longs
+                    Latitude = route.Path.Select(s => s.Lat).Average(),
+                    Longitude = route.Path.Select(s => s.Long).Average()
                 };
 
-                Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(basicGeo), 20, 0, 0, MapAnimationKind.Bow));
+                Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(basicGeo), 14, 0, 0, MapAnimationKind.Bow));
 
                 foreach (var stop in route.Path)
                 {
@@ -262,16 +282,20 @@ namespace CorvallisTransitForWindows
                     var arrivalsTask = Task.Run(() => GetArrivalsAsync(stop.Id));
                     arrivalsTask.Wait();
 
-                    GetDirectionsFromBing(stop);
+                    var arrival = arrivalsTask.Result.FirstOrDefault();
+                    if (arrival != null)
+                    {
+                        stop.ExpectedTime = arrival.Expected;
+
+                        ETAItem.Text = stop.ETADisplayText;
+                        
+                        FlyoutBase.ShowAttachedFlyout(sender);
+
+                        // Set this here so that Launching Bing for directions has the most current stop.
+                        SelectedStop = stop;
+                    }
                 }
             }
-        }
-
-        private static void GetDirectionsFromBing(Stop stop)
-        {
-            string uriToLaunch = string.Format("ms-walk-to:?destination.latitude={0}&destination.longitude={1}",
-                                                                    stop.Lat, stop.Long);
-            Task.Run(() => Launcher.LaunchUriAsync(new Uri(uriToLaunch)));
         }
 
         /// <summary>
@@ -347,5 +371,20 @@ namespace CorvallisTransitForWindows
         }
 
         #endregion
+
+        private void DirectionsItem_Click(object sender, RoutedEventArgs e)
+        {
+            LaunchAndGetDirectionsFromMaps();
+        }
+
+        /// <summary>
+        /// Launches Maps with walking directions from the selected stop
+        /// </summary>
+        private static void LaunchAndGetDirectionsFromMaps()
+        {
+            string uriToLaunch = string.Format("ms-walk-to:?destination.latitude={0}&destination.longitude={1}",
+                                                                    SelectedStop.Lat, SelectedStop.Long);
+            Task.Run(() => Launcher.LaunchUriAsync(new Uri(uriToLaunch)));
+        }
     }
 }
