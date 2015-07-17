@@ -256,7 +256,6 @@ namespace CorvallisTransitForWindows
 
             if (SelectedRoute != null)
             {
-                // This is highly-dependent on Zoom level.  Being zoomed out too far screws this up.
                 var stop = SelectedRoute.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
                 if (stop != null)
                 {
@@ -295,8 +294,8 @@ namespace CorvallisTransitForWindows
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)
         {
-            return Math.Abs(s.Lat - location.Position.Latitude) < 0.0001 &&
-                   Math.Abs(s.Long - location.Position.Longitude) < 0.0001;
+            return Math.Abs(s.Lat - location.Position.Latitude) < 0.001 &&
+                   Math.Abs(s.Long - location.Position.Longitude) < 0.001;
         }
 
         #region Hamburger Button Display Logic
