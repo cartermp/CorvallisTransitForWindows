@@ -27,6 +27,8 @@ namespace CorvallisTransitForWindows
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public static MainPage Current;
+
         private static Route SelectedRoute;
 
         private static string ROUTES_URL = "http://www.corvallis-bus.appspot.com/routes";
@@ -37,6 +39,7 @@ namespace CorvallisTransitForWindows
         public MainPage()
         {
             InitializeComponent();
+            Current = this;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -258,18 +261,8 @@ namespace CorvallisTransitForWindows
                 if (stop != null)
                 {
                     var arrivalsTask = Task.Run(() => GetArrivalsAsync(stop.Id));
-
-                    ToastTemplateType type = ToastTemplateType.ToastText01;
-                    XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(type);
-
-                    var toastTextElements = toastXml.GetElementsByTagName("text");
-
                     arrivalsTask.Wait();
-                    var arrivals = arrivalsTask.Result;
 
-                    toastTextElements[0].AppendChild(toastXml.CreateTextNode("Expected: " + arrivals.First().Expected.ToString("t")));
-
-                    ToastNotificationManager.CreateToastNotifier().Show(new ToastNotification(toastXml));
                     GetDirectionsFromBing(stop);
                 }
             }

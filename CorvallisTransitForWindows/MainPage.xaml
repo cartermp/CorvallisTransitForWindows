@@ -14,7 +14,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="48" />
-                    <ColumnDefinition />
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <!-- Showing a ToolTip and the Label is redundant.  We put the ToolTip on the icon.
                      It appears when the user hovers over the icon, but not the label which provides
@@ -71,8 +71,10 @@
                                           ItemInvoked="NavMenuList_ItemInvoked" />
             </SplitView.Pane>
 
-            <!-- The content the user actually interacts with. -->
-            <Maps:MapControl x:Name="RouteMap" Loaded="RouteMap_Loaded" MapElementClick="RouteMap_MapElementClick" Grid.ColumnSpan="2"/>
+            <Frame x:Name="ContentFrame">
+                <Maps:MapControl x:Name="RouteMap" Loaded="RouteMap_Loaded" MapElementClick="RouteMap_MapElementClick" />
+            </Frame>
+
         </SplitView>
 
         <!-- Declared last so that it is rendered above everything else.  Needs to be the first item in the tab sequence. -->
