@@ -7,6 +7,7 @@
     xmlns:Maps="using:Windows.UI.Xaml.Controls.Maps"
     xmlns:controls="using:CorvallisTransitForWindows.Controls"
     x:Class="CorvallisTransitForWindows.MainPage"
+    x:Name="Main"
     mc:Ignorable="d">
 
     <Page.Resources>

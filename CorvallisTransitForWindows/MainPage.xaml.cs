@@ -19,7 +19,8 @@ using Windows.UI.Xaml.Controls.Maps;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Navigation;
 using Windows.Web.Http;
-
+using CorvallisTransitForWindows.Util;
+using Windows.ApplicationModel.Core;
 
 namespace CorvallisTransitForWindows
 {
@@ -109,21 +110,21 @@ namespace CorvallisTransitForWindows
 
             SelectedRoute = route;
 
-            if (route != null && route.Path != null && route.Path.Count > 0)
+            if (route.Path.HasContent())
             {
                 // Clear out anything else, otherwise we end up with one ugly map.
                 RouteMap.MapElements.Clear();
 
                 DrawRoutePolyline(route);
 
-                var basicGeo = new BasicGeoposition()
+                var routeCenter = new BasicGeoposition()
                 {
                     // Best attempt to center the route on the page is to average Lat/Longs
                     Latitude = route.Path.Select(s => s.Lat).Average(),
                     Longitude = route.Path.Select(s => s.Long).Average()
                 };
 
-                Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(basicGeo), 14, 0, 0, MapAnimationKind.Bow));
+                Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(routeCenter), 14, 0, 0, MapAnimationKind.Bow));
 
                 foreach (var stop in route.Path)
                 {
@@ -207,7 +208,7 @@ namespace CorvallisTransitForWindows
         /// </summary>
         private static List<BasicGeoposition> PolylineToLocations(string polyLine)
         {
-            if (string.IsNullOrWhiteSpace(polyLine))
+            if (polyLine.IsNullOrWhiteSpace())
             {
                 return null;
             }
@@ -288,7 +289,7 @@ namespace CorvallisTransitForWindows
                         stop.ExpectedTime = arrival.Expected;
 
                         ETAItem.Text = stop.ETADisplayText;
-                        
+
                         FlyoutBase.ShowAttachedFlyout(sender);
 
                         // Set this here so that Launching Bing for directions has the most current stop.
