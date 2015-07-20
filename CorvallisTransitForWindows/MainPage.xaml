@@ -25,15 +25,20 @@
                 <TextBlock x:Name="Text" Grid.Column="1" Text="{x:Bind Label}" />
             </Grid>
         </DataTemplate>
-        <MenuFlyout x:Key="StopFlyout" Placement="Right">
+        <MenuFlyout x:Key="StopFlyout">
             <MenuFlyout.MenuFlyoutPresenterStyle>
                 <Style TargetType="MenuFlyoutPresenter">
                     <Setter Property="BorderBrush" Value="AliceBlue"/>
                 </Style>
             </MenuFlyout.MenuFlyoutPresenterStyle>
-            <MenuFlyoutItem x:Name="ETAItem" IsEnabled="False" />
+            <MenuFlyoutItem x:Name="ETAItem" 
+                            FontWeight="Bold" FontFamily="Segoe UI Black" FontSize="18.667" 
+                            IsHitTestVisible="False" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center" />
             <MenuFlyoutSeparator />
-            <MenuFlyoutItem Text="Walking Directions" Click="DirectionsItem_Click"/>
+            <MenuFlyoutItem Text="Walking Directions" 
+                            Click="DirectionsItem_Click"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </MenuFlyout>
     </Page.Resources>
 
@@ -69,7 +74,8 @@
         <SplitView x:Name="RootSplitView" 
                    DisplayMode="Inline"
                    OpenPaneLength="256"
-                   IsTabStop="false">
+                   IsTabStop="false"
+                   FlyoutBase.AttachedFlyout="{StaticResource StopFlyout}">
 
             <!-- The actual nav menu. Filled dynamically by service call. -->
             <SplitView.Pane>
@@ -86,7 +92,7 @@
                 <Maps:MapControl x:Name="RouteMap" 
                                  Loaded="RouteMap_Loaded" 
                                  MapElementClick="RouteMap_MapElementClick"
-                                 FlyoutBase.AttachedFlyout="{StaticResource StopFlyout}"/>
+                                 />
             </Frame>
 
         </SplitView>

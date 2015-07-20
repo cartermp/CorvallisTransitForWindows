@@ -290,9 +290,9 @@ namespace CorvallisTransitForWindows
 
                         ETAItem.Text = stop.ETADisplayText;
 
-                        FlyoutBase.ShowAttachedFlyout(sender);
+                        FlyoutBase.ShowAttachedFlyout(RootSplitView);
 
-                        // Set this here so that Launching Bing for directions has the most current stop.
+                        // Set this here so that Launching Maps for directions has the most current stop.
                         SelectedStop = stop;
                     }
                 }

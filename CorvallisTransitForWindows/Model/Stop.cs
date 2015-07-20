@@ -78,7 +78,7 @@ namespace CorvallisTransitForWindows.Model
 
                     if (seconds > 30)
                     {
-                        text = seconds + "seconds";
+                        text = seconds + " sec";
                     }
                     else
                     {
