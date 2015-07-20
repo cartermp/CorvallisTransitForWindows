@@ -21,9 +21,9 @@ View when the app first opens:
 
 ![overall](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitOverall.PNG)
 
-Or in "phone" view:
+Or in "phone" view with route 4 selected:
 
-![phone view](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitPhoneView.PNG)
+![phone view route 4](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute4.PNG)
 
 View when selecting a route (in this case, Route 3):
 
@@ -35,6 +35,6 @@ View when selecting a route (in this case, Route 3):
 
 - Seeing the route your selected and all of its stops as pins on the map
 
-- Toast Notification for expected arrival of selected route to selected stop
+- Flyout with ETA for a route on a stop
 
 - Walking directions to selected stop (via Maps app)
