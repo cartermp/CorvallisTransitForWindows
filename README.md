@@ -25,10 +25,6 @@ Or in "phone" view with route 4 selected:
 
 ![phone view route 4](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute4.PNG)
 
-View when selecting a route (in this case, Route 3):
-
-![route 3](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute3.PNG)
-
 ## Features (small in number as they are)
 
 - Seeing all routes on a pretty map
