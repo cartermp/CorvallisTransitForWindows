@@ -12,9 +12,5 @@ namespace CorvallisTransitForWindows.Model
     public class Arrival
     {
         public DateTime Expected { get; set; }
-
-        public DateTime Scheduled { get; set; }
-
-        public string Route { get; set; }
     }
 }

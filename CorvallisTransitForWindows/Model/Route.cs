@@ -17,11 +17,6 @@ namespace CorvallisTransitForWindows.Model
         public string Name { get; set; }
 
         /// <summary>
-        /// Name with "Route" prepended.
-        /// </summary>
-        public string DisplayName { get; set; }
-
-        /// <summary>
         /// The list of stops a bus passes, in the order the bus will pass them.
         /// </summary>
         public List<Stop> Path { get; set; }
@@ -30,9 +25,6 @@ namespace CorvallisTransitForWindows.Model
         /// List of Lat/Longs which correspond to the polyline.
         /// </summary>
         public List<BasicGeoposition> PolyLinePositions { get; set; }
-
-
-        public DateTime LastStopTimeUpdated { get; set; }
 
         /// <summary>
         /// Polyline encoding for the route as if it were drawn on a map, colored uniquely

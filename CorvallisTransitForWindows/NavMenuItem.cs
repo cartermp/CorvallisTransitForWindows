@@ -16,15 +16,5 @@ namespace CorvallisTransitForWindows
     {
         public string Label { get; set; }
         public string ShortLabel { get; set; }
-        public Symbol Symbol { get; set; }
-        public char SymbolAsChar
-        {
-            get
-            {
-                return (char)this.Symbol;
-            }
-        }
-        
-        public object Arguments { get; set; }
     }
 }

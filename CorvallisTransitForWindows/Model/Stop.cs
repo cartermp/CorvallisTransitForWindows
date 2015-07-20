@@ -9,26 +9,6 @@ namespace CorvallisTransitForWindows.Model
     public class Stop
     {
         /// <summary>
-        /// Stop name as following CTS conventions (street & cross-street).
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The primary road the stop is located on.
-        /// </summary>
-        public string Road { get; set; }
-
-        /// <summary>
-        /// The bearing (as if on a map) of the stop.
-        /// </summary>
-        public float Bearing { get; set; }
-
-        /// <summary>
-        /// Whether or not a bus adheres to the scheduled time for this stop.
-        /// </summary>
-        public bool AdherencePoint { get; set; }
-
-        /// <summary>
         /// Latitude.
         /// </summary>
         public double Lat { get; set; }
@@ -47,11 +27,6 @@ namespace CorvallisTransitForWindows.Model
         /// The time one can expect a bus to arrive at this stop.  Not necessarily the scheduled time.
         /// </summary>
         public DateTime ExpectedTime { get; set; }
-
-        /// <summary>
-        /// The time that a bus is supposed to arrive at this stop.
-        /// </summary>
-        public DateTime ScheduledTime { get; set; }
 
         /// <summary>
         /// The number of minutes one can expect a bus to arrive at this stop.
