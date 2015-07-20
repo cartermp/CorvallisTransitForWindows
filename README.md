@@ -15,19 +15,21 @@ To learn new things, of course!
 
 This code probably has some bugs and is absolutely *not* feature-complete nor production-worthy.
 
+## Samples I found helpful
+
+- [ResizeView](https://github.com/Microsoft/Windows-universal-samples/tree/master/ResizeView/cs)
+- [mapcontrolsample](https://github.com/Microsoft/Windows-universal-samples/tree/master/mapcontrolsample)
+- [xaml_navigation](https://github.com/Microsoft/Windows-universal-samples/tree/master/xaml_navigation/CS)
+
 ## What it looks like
 
 View when the app first opens:
 
 ![overall](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitOverall.PNG)
 
-Or in "phone" view:
+Or in "phone" view with route 4 selected:
 
-![phone view](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitPhoneView.PNG)
-
-View when selecting a route (in this case, Route 3):
-
-![route 3](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute3.PNG)
+![phone view route 4](https://raw.githubusercontent.com/cartermp/CorvallisTransitForWindows/master/CorvallisTransitForWindows/Assets/CorvallisTransitRoute4.PNG)
 
 ## Features (small in number as they are)
 
@@ -35,6 +37,6 @@ View when selecting a route (in this case, Route 3):
 
 - Seeing the route your selected and all of its stops as pins on the map
 
-- Toast Notification for expected arrival of selected route to selected stop
+- Flyout with ETA for a route on a stop
 
 - Walking directions to selected stop (via Maps app)
