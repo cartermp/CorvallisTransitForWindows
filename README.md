@@ -15,6 +15,12 @@ To learn new things, of course!
 
 This code probably has some bugs and is absolutely *not* feature-complete nor production-worthy.
 
+## Samples I found helpful
+
+- [ResizeView](https://github.com/Microsoft/Windows-universal-samples/tree/master/ResizeView/cs)
+- [mapcontrolsample](https://github.com/Microsoft/Windows-universal-samples/tree/master/mapcontrolsample)
+- [xaml_navigation](https://github.com/Microsoft/Windows-universal-samples/tree/master/xaml_navigation/CS)
+
 ## What it looks like
 
 View when the app first opens:
