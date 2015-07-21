@@ -1,17 +1,17 @@
 ﻿using CorvallisTransitForWindows.Controls;
 using CorvallisTransitForWindows.Model;
+using CorvallisTransitForWindows.Util;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Data.Xml.Dom;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI;
-using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
@@ -19,8 +19,6 @@ using Windows.UI.Xaml.Controls.Maps;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Navigation;
 using Windows.Web.Http;
-using CorvallisTransitForWindows.Util;
-using Windows.ApplicationModel.Core;
 
 namespace CorvallisTransitForWindows
 {
@@ -30,6 +28,8 @@ namespace CorvallisTransitForWindows
     public sealed partial class MainPage : Page
     {
         public static MainPage Current;
+
+        private StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
 
         //
         // Yes, globals like this suck, but it's the best way (that I can figure out) to handle all these types of events.
