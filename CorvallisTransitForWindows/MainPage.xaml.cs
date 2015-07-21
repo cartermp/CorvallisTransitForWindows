@@ -81,7 +81,7 @@ namespace CorvallisTransitForWindows
         {
             if (!args.InRecycleQueue && args.Item != null && args.Item is NavMenuItem)
             {
-                args.ItemContainer.SetValue(AutomationProperties.NameProperty, ((NavMenuItem)args.Item).Label);
+                args.ItemContainer.SetValue(AutomationProperties.NameProperty, (args.Item as NavMenuItem)?.Label);
             }
             else
             {
@@ -101,7 +101,7 @@ namespace CorvallisTransitForWindows
                 return;
             }
 
-            var route = (sender as NavMenuListView).ItemFromContainer(e) as Route;
+            var route = (sender as NavMenuListView)?.ItemFromContainer(e) as Route;
             if (route == null)
             {
                 // Sweep this problem under the rug by failing silently.
@@ -112,33 +112,41 @@ namespace CorvallisTransitForWindows
 
             if (route.Path.HasContent())
             {
-                // Clear out anything else, otherwise we end up with one ugly map.
-                RouteMap.MapElements.Clear();
+                DrawRouteAndItsStopsOnMap(route);
+            }
+        }
 
-                DrawRoutePolyline(route);
+        /// <summary>
+        /// Draws the route's polyline on the map and lays down map markers which correspond to the route's stops.
+        /// </summary>
+        private void DrawRouteAndItsStopsOnMap(Route route)
+        {
+            // Clear out anything else, otherwise we end up with one ugly map.
+            RouteMap.MapElements.Clear();
 
-                var routeCenter = new BasicGeoposition()
+            DrawRoutePolyline(route);
+
+            var routeCenter = new BasicGeoposition()
+            {
+                // Best attempt to center the route on the page is to average Lat/Longs
+                Latitude = route.Path.Select(s => s.Lat).Average(),
+                Longitude = route.Path.Select(s => s.Long).Average()
+            };
+
+            Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(routeCenter), 14, 0, 0, MapAnimationKind.Bow));
+
+            foreach (var stop in route.Path)
+            {
+                var pin = new MapIcon()
                 {
-                    // Best attempt to center the route on the page is to average Lat/Longs
-                    Latitude = route.Path.Select(s => s.Lat).Average(),
-                    Longitude = route.Path.Select(s => s.Long).Average()
+                    Location = new Geopoint(new BasicGeoposition()
+                    {
+                        Latitude = stop.Lat,
+                        Longitude = stop.Long
+                    })
                 };
 
-                Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(routeCenter), 14, 0, 0, MapAnimationKind.Bow));
-
-                foreach (var stop in route.Path)
-                {
-                    var pin = new MapIcon()
-                    {
-                        Location = new Geopoint(new BasicGeoposition()
-                        {
-                            Latitude = stop.Lat,
-                            Longitude = stop.Long
-                        })
-                    };
-
-                    RouteMap.MapElements.Add(pin);
-                }
+                RouteMap.MapElements.Add(pin);
             }
         }
 
@@ -258,9 +266,11 @@ namespace CorvallisTransitForWindows
                 }
 
                 currentLng += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
+
                 BasicGeoposition p = new BasicGeoposition();
                 p.Latitude = Convert.ToDouble(currentLat) / 100000.0;
                 p.Longitude = Convert.ToDouble(currentLng) / 100000.0;
+
                 poly.Add(p);
             }
 
@@ -277,7 +287,7 @@ namespace CorvallisTransitForWindows
 
             if (SelectedRoute != null)
             {
-                var stop = SelectedRoute.Path.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
+                var stop = SelectedRoute.Path?.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
                 if (stop != null)
                 {
                     var arrivalsTask = Task.Run(() => GetArrivalsAsync(stop.Id));
