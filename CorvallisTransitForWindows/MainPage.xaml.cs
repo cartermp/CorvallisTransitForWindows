@@ -293,17 +293,50 @@ namespace CorvallisTransitForWindows
                     var arrival = arrivalsTask.Result.FirstOrDefault();
                     if (arrival != null)
                     {
-                        stop.ExpectedTime = arrival.Expected;
-
-                        ETAItem.Text = stop.ETADisplayText;
-
-                        FlyoutBase.ShowAttachedFlyout(RootSplitView);
-
-                        // Set this here so that Launching Maps for directions has the most current stop.
-                        SelectedStop = stop;
+                        ShowArrivalMenu(sender, stop, arrival);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Displays the Arrivals Flyout, anchored to the pressed map marker.
+        /// </summary>
+        private void ShowArrivalMenu(MapControl sender, Stop stop, Arrival arrival)
+        {
+            stop.ExpectedTime = arrival.Expected;
+
+            ETAItem.Text = stop.ETADisplayText;
+
+            var flyout = FlyoutBase.GetAttachedFlyout(RootSplitView) as MenuFlyout;
+            if (flyout != null)
+            {
+                ShowFlyoutAboveMapMarker(sender, stop, flyout);
+            }
+
+            // Set this here so that Launching Maps for directions has the most current stop.
+            SelectedStop = stop;
+        }
+
+        /// <summary>
+        /// Does what the function name states.
+        /// 
+        /// Because Map Markers are child elements of the MapControl, they cannot be a natural
+        /// anchor point for the flyout to display.  Thus we need to manually anchor the flyout
+        /// based on the marker pressed.
+        /// </summary>
+        private static void ShowFlyoutAboveMapMarker(MapControl sender, Stop stop, MenuFlyout flyout)
+        {
+            var stopGeo = new BasicGeoposition
+            {
+                Latitude = stop.Lat,
+                Longitude = stop.Long
+            };
+
+            Point markerPoint;
+            sender.GetOffsetFromLocation(new Geopoint(stopGeo), out markerPoint);
+
+            flyout.ShowAt(sender, markerPoint);
         }
 
         /// <summary>
@@ -359,22 +392,22 @@ namespace CorvallisTransitForWindows
         /// </summary>
         private void CheckTogglePaneButtonSizeChanged()
         {
-            if (this.RootSplitView.DisplayMode == SplitViewDisplayMode.Inline ||
-                this.RootSplitView.DisplayMode == SplitViewDisplayMode.Overlay)
+            if (RootSplitView.DisplayMode == SplitViewDisplayMode.Inline ||
+                RootSplitView.DisplayMode == SplitViewDisplayMode.Overlay)
             {
-                var transform = this.TogglePaneButton.TransformToVisual(this);
-                var rect = transform.TransformBounds(new Rect(0, 0, this.TogglePaneButton.ActualWidth, this.TogglePaneButton.ActualHeight));
-                this.TogglePaneButtonRect = rect;
+                var transform = TogglePaneButton.TransformToVisual(this);
+                var rect = transform.TransformBounds(new Rect(0, 0, TogglePaneButton.ActualWidth, TogglePaneButton.ActualHeight));
+                TogglePaneButtonRect = rect;
             }
             else
             {
-                this.TogglePaneButtonRect = new Rect();
+                TogglePaneButtonRect = new Rect();
             }
 
-            var handler = this.TogglePaneButtonRectChanged;
+            var handler = TogglePaneButtonRectChanged;
             if (handler != null)
             {
-                handler(this, this.TogglePaneButtonRect);
+                handler(this, TogglePaneButtonRect);
             }
         }
 
