@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
-using Windows.Storage;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -28,9 +27,7 @@ namespace CorvallisTransitForWindows
     public sealed partial class MainPage : Page
     {
         public static MainPage Current;
-
-        private StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
-
+        
         //
         // Yes, globals like this suck, but it's the best way (that I can figure out) to handle all these types of events.
         //
