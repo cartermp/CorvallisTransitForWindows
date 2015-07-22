@@ -69,4 +69,3 @@ The left-hand side represents the "bar" that you see when the panel isn't expand
 - Ability to search stops and launch directs from the nav menu
 - Settings menu to allow user to clear out everything, show open source licenses, etc
 - Splash screen with proper logo
-- 
