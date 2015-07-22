@@ -40,3 +40,33 @@ Or in "phone" view with route 4 selected:
 - Flyout with ETA for a route on a stop
 
 - Walking directions to selected stop (via Maps app)
+
+## Work that needs to be done
+
+- Getting the UI Theme consistent w.r.t Window color and text color.  Currently the window which "holds" the app is still white with black text, and that needs to be inverted.
+- Different Navigation format.  Something along the lines of this:
+
+```
+<F> | Favorites
+    |  |
+    |  --- 49th Street & Technology Loop
+    |  --- 26th Street & Madison or whatever
+<R> | CTS Routes
+    |  |
+    |  --- Route 1
+    |  --- Route 2
+<D> | Directions
+    | To Stop [    ] [go]
+<S> | Settings
+```
+
+The left-hand side represents the "bar" that you see when the panel isn't expanded.  When it's expanded the right-hand size is visible.  On phones (720p or lower), the left-hand side is not visible.  Look at the Maps app on Windows 10 for an example of this.
+
+`<F>` is an icon for Favorites, `<R>` is an icon for Routes, `<D>` is some Directions icon, and `<S>` is some Settings icon.
+
+- Caching or local storage for static route and stop info so it doesn't hit the network every time
+- Ability to add a stop to a favorites list, which is then persisted throughout
+- Ability to search stops and launch directs from the nav menu
+- Settings menu to allow user to clear out everything, show open source licenses, etc
+- Splash screen with proper logo
+- 
