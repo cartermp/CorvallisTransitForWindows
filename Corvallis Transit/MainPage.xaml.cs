@@ -2,20 +2,14 @@
 using Corvallis_Transit.Model;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Corvallis_Transit.Util;
 using Windows.Devices.Geolocation;
@@ -24,6 +18,7 @@ using System.Globalization;
 using Windows.UI;
 using Newtonsoft.Json;
 using Windows.Storage;
+using Windows.System;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -32,7 +27,7 @@ namespace Corvallis_Transit
     /// <summary>
     /// The Main Page, containing the list of Routes and the container for when a Route is selected.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage : Page, IDisposable
     {
         private const string STATIC_DATA_FILE = "static_data";
         public static MainPage Current;
@@ -45,10 +40,11 @@ namespace Corvallis_Transit
         private static Route SelectedRoute;
         private static Stop SelectedStop;
 
-        private static StaticTransitData _staticData;
+        private static List<Route> StaticRoutes;
+        private static Dictionary<int, Stop> StopLookup;
 
         private static string STATIC_DATA_URL = "http://corvallisbus.azurewebsites.net/transit/static";
-        private static string ARRIVALS_URL = "http://www.corvallis-bus.appspot.com/arrivals?stops=";
+        private static string ARRIVALS_URL = "http://corvallisbus.azurewebsites.net/transit/eta/";
 
         private HttpClient httpClient = new HttpClient();
 
@@ -68,11 +64,12 @@ namespace Corvallis_Transit
             var getStaticDataTask = Task.Run(() => GetStaticData());
             getStaticDataTask.Wait();
 
-            _staticData = getStaticDataTask.Result;
+            var staticData = getStaticDataTask.Result;
 
-            var routesList = _staticData.Routes.Select(x => x.Value).ToList();
-
-            foreach (var route in routesList)
+            StaticRoutes = staticData.Routes.Values.ToList();
+            StopLookup = staticData.Stops;
+            
+            foreach (var route in StaticRoutes)
             {
                 if (route.RouteNo.Contains("BB"))
                 {
@@ -84,7 +81,7 @@ namespace Corvallis_Transit
                 route.ShortLabel = route.RouteNo;
             }
 
-            NavMenuList.ItemsSource = routesList;
+            NavMenuList.ItemsSource = StaticRoutes;
         }
 
         /// <summary>
@@ -140,11 +137,13 @@ namespace Corvallis_Transit
 
             DrawRoutePolyline(route);
 
+            var stopsInRoute = route.Path.Select(p => StopLookup[p]);
+
             var routeCenter = new BasicGeoposition()
             {
                 // Best attempt to center the route on the page is to average Lat/Longs
-                Latitude = _staticData.Stops.Values.Where(s => route.Path.Contains(s.ID)).Select(s => s.Lat).Average(),
-                Longitude = _staticData.Stops.Values.Where(s => route.Path.Contains(s.ID)).Select(s => s.Long).Average()
+                Latitude = stopsInRoute.Select(s => s.Lat).Average(),
+                Longitude = stopsInRoute.Select(s => s.Long).Average()
             };
 
             Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(routeCenter), 14, 0, 0, MapAnimationKind.Bow));
@@ -155,8 +154,8 @@ namespace Corvallis_Transit
                 {
                     Location = new Geopoint(new BasicGeoposition()
                     {
-                        Latitude = _staticData.Stops[stopId].Lat,
-                        Longitude = _staticData.Stops[stopId].Long
+                        Latitude = StopLookup[stopId].Lat,
+                        Longitude = StopLookup[stopId].Long
                     })
                 };
 
@@ -306,16 +305,16 @@ namespace Corvallis_Transit
 
             if (SelectedRoute != null)
             {
-                var stopId = SelectedRoute.Path?.FirstOrDefault(s => AreLocationsTheSame(_staticData.Stops[s], args.Location));
-                if (stopId.HasValue)
+                var stopId = SelectedRoute.Path.FirstOrDefault(s => AreLocationsTheSame(StopLookup[s], args.Location));
+                if (stopId != default(int))
                 {
-                    var arrivalsTask = Task.Run(() => GetArrivalsAsync(stopId.Value));
+                    var arrivalsTask = Task.Run(() => GetArrivalsAsync(stopId));
                     arrivalsTask.Wait();
 
                     var arrival = arrivalsTask.Result;
                     if (arrival != null)
                     {
-                        ShowArrivalMenu(sender, _staticData.Stops[stopId.Value], arrival);
+                        ShowArrivalMenu(sender, StopLookup[stopId], arrival);
                     }
                 }
             }
@@ -324,9 +323,9 @@ namespace Corvallis_Transit
         /// <summary>
         /// Displays the Arrivals Flyout, anchored to the pressed map marker.
         /// </summary>
-        private void ShowArrivalMenu(MapControl sender, Stop stop, Arrival arrival)
+        private void ShowArrivalMenu(MapControl sender, Stop stop, Dictionary<int, Dictionary<string, int>> arrival)
         {
-            stop.ETA = arrival.WhatTheHeckRikkis[stop.ID][SelectedRoute.RouteNo];
+            stop.ETA = arrival[stop.ID][SelectedRoute.RouteNo];
 
             ETAItem.Text = stop.ETADisplayText;
 
@@ -364,7 +363,7 @@ namespace Corvallis_Transit
         /// <summary>
         /// Hits the Corvallis Bus server for updated arrivals for a given stop ID.
         /// </summary>
-        private async Task<Arrival> GetArrivalsAsync(int stopId)
+        private async Task<Dictionary<int, Dictionary<string, int>>> GetArrivalsAsync(int stopId)
         {
             var uri = new Uri(ARRIVALS_URL + stopId);
             var response = await httpClient.GetAsync(uri);
@@ -373,7 +372,7 @@ namespace Corvallis_Transit
 
             var text = await response.Content.ReadAsStringAsync();
 
-            return JsonConvert.DeserializeObject<Arrival>(text);
+            return JsonConvert.DeserializeObject<Dictionary<int, Dictionary<string, int>>>(text);
         }
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)
@@ -442,9 +441,14 @@ namespace Corvallis_Transit
         /// </summary>
         private static void LaunchAndGetDirectionsFromMaps()
         {
-            //string uriToLaunch = string.Format("ms-walk-to:?destination.latitude={0}&destination.longitude={1}",
-            //                                                        SelectedStop.Lat, SelectedStop.Long);
-            //Task.Run(() => Launcher.LaunchUriAsync(new Uri(uriToLaunch)));
+            string uriToLaunch = string.Format("ms-walk-to:?destination.latitude={0}&destination.longitude={1}",
+                                                                    SelectedStop.Lat, SelectedStop.Long);
+            Task.Run(() => Launcher.LaunchUriAsync(new Uri(uriToLaunch)));
+        }
+
+        public void Dispose()
+        {
+            httpClient.Dispose();
         }
     }
 }
