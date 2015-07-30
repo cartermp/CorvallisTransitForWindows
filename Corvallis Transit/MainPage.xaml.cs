@@ -108,26 +108,26 @@ namespace Corvallis_Transit
         /// </summary>
         private void NavMenuList_ItemInvoked(object sender, ListViewItem e)
         {
-            //var list = sender as NavMenuListView;
-            //if (list == null)
-            //{
-            //    // Sweep this problem under the rug by failing silently.
-            //    return;
-            //}
+            var list = sender as NavMenuListView;
+            if (list == null)
+            {
+                // Sweep this problem under the rug by failing silently.
+                return;
+            }
 
-            //var route = (sender as NavMenuListView)?.ItemFromContainer(e) as Route;
-            //if (route == null)
-            //{
-            //    // Sweep this problem under the rug by failing silently.
-            //    return;
-            //}
+            var route = (sender as NavMenuListView)?.ItemFromContainer(e) as Route;
+            if (route == null)
+            {
+                // Sweep this problem under the rug by failing silently.
+                return;
+            }
 
-            //SelectedRoute = route;
+            SelectedRoute = route;
 
-            //if (route.Path.HasContent())
-            //{
-            //    DrawRouteAndItsStopsOnMap(route);
-            //}
+            if (route.Path != null && route.Path.Any())
+            {
+                DrawRouteAndItsStopsOnMap(route);
+            }
         }
 
         /// <summary>
@@ -135,33 +135,33 @@ namespace Corvallis_Transit
         /// </summary>
         private void DrawRouteAndItsStopsOnMap(Route route)
         {
-            //// Clear out anything else, otherwise we end up with one ugly map.
-            //RouteMap.MapElements.Clear();
+            // Clear out anything else, otherwise we end up with one ugly map.
+            RouteMap.MapElements.Clear();
 
-            //DrawRoutePolyline(route);
+            DrawRoutePolyline(route);
 
-            //var routeCenter = new BasicGeoposition()
-            //{
-            //    // Best attempt to center the route on the page is to average Lat/Longs
-            //    Latitude = route.Path.Select(s => s.Lat).Average(),
-            //    Longitude = route.Path.Select(s => s.Long).Average()
-            //};
+            var routeCenter = new BasicGeoposition()
+            {
+                // Best attempt to center the route on the page is to average Lat/Longs
+                Latitude = _staticData.Stops.Values.Where(s => route.Path.Contains(s.ID)).Select(s => s.Lat).Average(),
+                Longitude = _staticData.Stops.Values.Where(s => route.Path.Contains(s.ID)).Select(s => s.Long).Average()
+            };
 
-            //Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(routeCenter), 14, 0, 0, MapAnimationKind.Bow));
+            Task.Run(() => RouteMap.TrySetViewAsync(new Geopoint(routeCenter), 14, 0, 0, MapAnimationKind.Bow));
 
-            //foreach (var stop in route.Path)
-            //{
-            //    var pin = new MapIcon()
-            //    {
-            //        Location = new Geopoint(new BasicGeoposition()
-            //        {
-            //            Latitude = stop.Lat,
-            //            Longitude = stop.Long
-            //        })
-            //    };
+            foreach (var stopId in route.Path)
+            {
+                var pin = new MapIcon()
+                {
+                    Location = new Geopoint(new BasicGeoposition()
+                    {
+                        Latitude = _staticData.Stops[stopId].Lat,
+                        Longitude = _staticData.Stops[stopId].Long
+                    })
+                };
 
-            //    RouteMap.MapElements.Add(pin);
-            //}
+                RouteMap.MapElements.Add(pin);
+            }
         }
 
         /// <summary>
@@ -298,27 +298,27 @@ namespace Corvallis_Transit
 
         private void RouteMap_MapElementClick(MapControl sender, MapElementClickEventArgs args)
         {
-            //// Just ignore anything that isn't a stop marker.
-            //if (!args.MapElements.Any(me => me is MapIcon))
-            //{
-            //    return;
-            //}
+            // Just ignore anything that isn't a stop marker.
+            if (!args.MapElements.Any(me => me is MapIcon))
+            {
+                return;
+            }
 
-            //if (SelectedRoute != null)
-            //{
-            //    var stop = SelectedRoute.Path?.FirstOrDefault(s => AreLocationsTheSame(s, args.Location));
-            //    if (stop != null)
-            //    {
-            //        var arrivalsTask = Task.Run(() => GetArrivalsAsync(stop.Id));
-            //        arrivalsTask.Wait();
+            if (SelectedRoute != null)
+            {
+                var stopId = SelectedRoute.Path?.FirstOrDefault(s => AreLocationsTheSame(_staticData.Stops[s], args.Location));
+                if (stopId.HasValue)
+                {
+                    var arrivalsTask = Task.Run(() => GetArrivalsAsync(stopId.Value));
+                    arrivalsTask.Wait();
 
-            //        var arrival = arrivalsTask.Result.FirstOrDefault();
-            //        if (arrival != null)
-            //        {
-            //            ShowArrivalMenu(sender, stop, arrival);
-            //        }
-            //    }
-            //}
+                    var arrival = arrivalsTask.Result;
+                    if (arrival != null)
+                    {
+                        ShowArrivalMenu(sender, _staticData.Stops[stopId.Value], arrival);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -326,18 +326,18 @@ namespace Corvallis_Transit
         /// </summary>
         private void ShowArrivalMenu(MapControl sender, Stop stop, Arrival arrival)
         {
-            //stop.ExpectedTime = arrival.Expected;
+            stop.ETA = arrival.WhatTheHeckRikkis[stop.ID][SelectedRoute.RouteNo];
 
-            //ETAItem.Text = stop.ETADisplayText;
+            ETAItem.Text = stop.ETADisplayText;
 
-            //var flyout = FlyoutBase.GetAttachedFlyout(RootSplitView) as MenuFlyout;
-            //if (flyout != null)
-            //{
-            //    ShowFlyoutAboveMapMarker(sender, stop, flyout);
-            //}
+            var flyout = FlyoutBase.GetAttachedFlyout(RootSplitView) as MenuFlyout;
+            if (flyout != null)
+            {
+                ShowFlyoutAboveMapMarker(sender, stop, flyout);
+            }
 
-            //// Set this here so that Launching Maps for directions has the most current stop.
-            //SelectedStop = stop;
+            // Set this here so that Launching Maps for directions has the most current stop.
+            SelectedStop = stop;
         }
 
         /// <summary>
@@ -364,7 +364,7 @@ namespace Corvallis_Transit
         /// <summary>
         /// Hits the Corvallis Bus server for updated arrivals for a given stop ID.
         /// </summary>
-        private async Task<List<Arrival>> GetArrivalsAsync(int stopId)
+        private async Task<Arrival> GetArrivalsAsync(int stopId)
         {
             var uri = new Uri(ARRIVALS_URL + stopId);
             var response = await httpClient.GetAsync(uri);
@@ -373,10 +373,7 @@ namespace Corvallis_Transit
 
             var text = await response.Content.ReadAsStringAsync();
 
-            text = text.Substring(9, text.Length - 10);
-
-            // As above, the async version of this is strangely deprecated.
-            return await Task.Run(() => JsonConvert.DeserializeObject<List<Arrival>>(text));
+            return JsonConvert.DeserializeObject<Arrival>(text);
         }
 
         private bool AreLocationsTheSame(Stop s, Geopoint location)

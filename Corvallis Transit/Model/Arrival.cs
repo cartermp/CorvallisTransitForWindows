@@ -8,5 +8,6 @@ namespace Corvallis_Transit.Model
 {
     public class Arrival
     {
+        public Dictionary<int, Dictionary<string, int>> WhatTheHeckRikkis { get; set; }
     }
 }

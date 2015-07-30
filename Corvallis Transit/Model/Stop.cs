@@ -13,5 +13,8 @@ namespace Corvallis_Transit.Model
         public double Lat { get; set; }
         public double Long { get; set; }
         public List<string> RouteNames { get; set; }
+        public int ETA { get; set; }
+
+        public string ETADisplayText => ETA + " mins";
     }
 }
