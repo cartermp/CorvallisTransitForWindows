@@ -70,21 +70,21 @@ namespace Corvallis_Transit
 
             _staticData = getStaticDataTask.Result;
 
-            //var routes = _staticData.Routes;
+            var routesList = _staticData.Routes.Select(x => x.Value).ToList();
 
-            //foreach (var route in routes)
-            //{
-            //    if (route.Name.Contains("BB"))
-            //    {
-            //        route.Name = route.Name.Replace("BB", "NO");
-            //    }
+            foreach (var route in routesList)
+            {
+                if (route.RouteNo.Contains("BB"))
+                {
+                    route.RouteNo = route.RouteNo.Replace("BB", "NO");
+                }
 
-            //    route.PolyLinePositions = PolylineToLocations(route.Polyline);
-            //    route.Label = "CTS Route " + route.Name;
-            //    route.ShortLabel = route.Name;
-            //}
+                route.PolyLinePositions = PolylineToLocations(route.Polyline);
+                route.Label = "CTS Route " + route.RouteNo;
+                route.ShortLabel = route.RouteNo;
+            }
 
-            //NavMenuList.ItemsSource = routes;
+            NavMenuList.ItemsSource = routesList;
         }
 
         /// <summary>
@@ -169,14 +169,13 @@ namespace Corvallis_Transit
         /// </summary>
         private async void RouteMap_Loaded(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => 2 + 2);
-            //var corvallis = GetCorvallisLocation();
-            //await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Linear);
+            var corvallis = GetCorvallisLocation();
+            await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Linear);
 
-            //foreach (var route in NavMenuList.ItemsSource as List<Route>)
-            //{
-            //    DrawRoutePolyline(route);
-            //}
+            foreach (var route in NavMenuList.ItemsSource as List<Route>)
+            {
+                DrawRoutePolyline(route);
+            }
         }
 
         private Geopoint GetCorvallisLocation()
@@ -189,20 +188,20 @@ namespace Corvallis_Transit
         /// </summary>
         private void DrawRoutePolyline(Route route)
         {
-            //var polyLine = new MapPolyline();
-            //polyLine.Path = new Geopath(route.PolyLinePositions);
+            var polyLine = new MapPolyline();
+            polyLine.Path = new Geopath(route.PolyLinePositions);
 
-            //// Taken from here: http://stackoverflow.com/a/5800540
-            //uint argb = uint.Parse(route.Color.Replace("#", ""), NumberStyles.HexNumber);
+            // Taken from here: http://stackoverflow.com/a/5800540
+            uint argb = uint.Parse(route.Color.Replace("#", ""), NumberStyles.HexNumber);
 
-            //byte r = (byte)((argb & 0xff0000) >> 0x10);
-            //byte g = (byte)((argb & 0xff00) >> 8);
-            //byte b = (byte)(argb & 0xff);
+            byte r = (byte)((argb & 0xff0000) >> 0x10);
+            byte g = (byte)((argb & 0xff00) >> 8);
+            byte b = (byte)(argb & 0xff);
 
-            //polyLine.StrokeColor = Color.FromArgb(/* Just make it 100% */ 0xAA, r, g, b);
-            //polyLine.StrokeThickness = 5;
+            polyLine.StrokeColor = Color.FromArgb(/* Just make it 100% */ 0xAA, r, g, b);
+            polyLine.StrokeThickness = 5;
 
-            //RouteMap.MapElements.Add(polyLine);
+            RouteMap.MapElements.Add(polyLine);
         }
 
         /// <summary>
