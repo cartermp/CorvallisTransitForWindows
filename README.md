@@ -54,7 +54,6 @@ The left-hand side represents the "bar" that you see when the panel isn't expand
 
 `<F>` is an icon for Favorites, `<R>` is an icon for Routes, `<D>` is some Directions icon, and `<S>` is some Settings icon.
 
-- Caching or local storage for static route and stop info so it doesn't hit the network every time
 - Ability to add a stop to a favorites list, which is then persisted throughout
 - Ability to search stops and launch directs from the nav menu
 - Settings menu to allow user to clear out everything, show open source licenses, etc
