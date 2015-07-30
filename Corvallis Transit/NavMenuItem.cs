@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Corvallis_Transit
+{
+    /// <summary>
+    /// Data to represent an item in the nav menu.
+    /// 
+    /// Copied and modified from the xaml_navigation sample: https://github.com/Microsoft/Windows-universal-samples/tree/master/xaml_navigation/CS
+    /// </summary>
+    public class NavMenuItem
+    {
+        public string Label { get; set; }
+        public string ShortLabel { get; set; }
+    }
+}
