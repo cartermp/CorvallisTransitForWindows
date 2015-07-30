@@ -39,6 +39,9 @@
             <MenuFlyoutItem Text="Walking Directions" 
                             Click="DirectionsItem_Click"
                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <MenuFlyoutItem Text="Add to Favorites"
+                            Click="FavoritesAdd_Click"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </MenuFlyout>
     </Page.Resources>
 

@@ -20,8 +20,6 @@ using Newtonsoft.Json;
 using Windows.Storage;
 using Windows.System;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
-
 namespace Corvallis_Transit
 {
     /// <summary>
@@ -30,6 +28,8 @@ namespace Corvallis_Transit
     public sealed partial class MainPage : Page, IDisposable
     {
         private const string STATIC_DATA_FILE = "static_data";
+        private const string FAVORITE_STOPS = "favorite_stops";
+
         public static MainPage Current;
 
         private StorageFolder localFolder;
@@ -325,8 +325,14 @@ namespace Corvallis_Transit
         /// </summary>
         private void ShowArrivalMenu(MapControl sender, Stop stop, Dictionary<int, Dictionary<string, int>> arrival)
         {
-            stop.ETA = arrival[stop.ID][SelectedRoute.RouteNo];
+            int eta;            
+            if (!arrival[stop.ID].TryGetValue(SelectedRoute.RouteNo, out eta))
+            {
+                // Sweep this problem under the rug.
+                return;
+            }
 
+            stop.ETA = eta;
             ETAItem.Text = stop.ETADisplayText;
 
             var flyout = FlyoutBase.GetAttachedFlyout(RootSplitView) as MenuFlyout;
@@ -449,6 +455,38 @@ namespace Corvallis_Transit
         public void Dispose()
         {
             httpClient.Dispose();
+        }
+
+        /// <summary>
+        /// Adds the currently selected stop to the list of favorite stops, provided it's not already there.
+        /// </summary>
+        private async void FavoritesAdd_Click(object sender, RoutedEventArgs e)
+        {
+            var file = await localFolder.CreateFileAsync(FAVORITE_STOPS, CreationCollisionOption.OpenIfExists);
+
+            var json = await FileIO.ReadTextAsync(file);
+            if (json.IsNullOrWhiteSpace())
+            {
+                List<Stop> favorites = new List<Stop>() { SelectedStop };
+
+                json = JsonConvert.SerializeObject(favorites);
+
+                await FileIO.WriteTextAsync(file, json);
+            }
+            else
+            {
+                var favorites = JsonConvert.DeserializeObject<List<Stop>>(json);
+
+                // Only do this if it's not already in the list!
+                if (!favorites.Any(s => s.ID == SelectedStop.ID))
+                {
+                    favorites.Add(SelectedStop);
+
+                    json = JsonConvert.SerializeObject(favorites);
+
+                    await FileIO.WriteTextAsync(file, json);
+                }
+            }
         }
     }
 }
