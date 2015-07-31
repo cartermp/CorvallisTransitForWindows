@@ -4,3 +4,7 @@
 
 /.vs/CorvallisTransitForWindows/v14
 /.vs/config
+/Corvallis Transit/bin
+/Corvallis Transit/obj
+*.user
+*.lock.*
