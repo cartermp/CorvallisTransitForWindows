@@ -48,6 +48,30 @@ namespace Corvallis_Transit
 
         private HttpClient httpClient = new HttpClient();
 
+        private List<NavMenuItem> NavList = new List<NavMenuItem>
+        {
+            new NavMenuItem
+            {
+                Symbol = Symbol.Favorite,
+                Label = "Favorite Stops"
+            },
+            new NavMenuItem
+            {
+                Symbol = Symbol.MapDrive, // Figure out something decent here
+                Label = "CTS Routes"
+            },
+            new NavMenuItem
+            {
+                Symbol = Symbol.Directions,
+                Label = "Directions"
+            },
+            new NavMenuItem
+            {
+                Symbol = Symbol.Setting,
+                Label = "Settings"
+            }
+        };
+
         public MainPage()
         {
             InitializeComponent();
@@ -68,7 +92,7 @@ namespace Corvallis_Transit
 
             StaticRoutes = staticData.Routes.Values.ToList();
             StopLookup = staticData.Stops;
-            
+
             foreach (var route in StaticRoutes)
             {
                 if (route.RouteNo.Contains("BB"))
@@ -77,11 +101,9 @@ namespace Corvallis_Transit
                 }
 
                 route.PolyLinePositions = PolylineToLocations(route.Polyline);
-                route.Label = "CTS Route " + route.RouteNo;
-                route.ShortLabel = route.RouteNo;
             }
 
-            NavMenuList.ItemsSource = StaticRoutes;
+            NavMenuList.ItemsSource = NavList;
         }
 
         /// <summary>
@@ -171,7 +193,7 @@ namespace Corvallis_Transit
             var corvallis = GetCorvallisLocation();
             await RouteMap.TrySetViewAsync(corvallis, 13.3, 0, 0, MapAnimationKind.Linear);
 
-            foreach (var route in NavMenuList.ItemsSource as List<Route>)
+            foreach (var route in StaticRoutes)
             {
                 DrawRoutePolyline(route);
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
 
 namespace Corvallis_Transit
 {
@@ -15,5 +16,13 @@ namespace Corvallis_Transit
     {
         public string Label { get; set; }
         public string ShortLabel { get; set; }
+        public Symbol Symbol { get; set; }
+        public char SymbolAsChar
+        {
+            get
+            {
+                return (char)Symbol;
+            }
+        }
     }
 }

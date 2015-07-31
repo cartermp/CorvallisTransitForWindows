@@ -21,7 +21,7 @@
                      It appears when the user hovers over the icon, but not the label which provides
                      value when the SplitView is 'Compact' while reducing the likelihood of showing
                      redundant information when the label is shown.-->
-                <TextBlock x:Name="RouteNumber" Text="{x:Bind ShortLabel}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{x:Bind Label}"/>
+                <FontIcon x:Name="Glyph" FontSize="16" Glyph="{x:Bind SymbolAsChar}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{x:Bind Label}"/>
                 <TextBlock x:Name="Text" Grid.Column="1" Text="{x:Bind Label}" />
             </Grid>
         </DataTemplate>
@@ -56,7 +56,7 @@
                         <AdaptiveTrigger MinWindowWidth="720" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="RootSplitView.DisplayMode" Value="CompactInline" />
+                        <Setter Target="RootSplitView.DisplayMode" Value="CompactOverlay" />
                         <Setter Target="RootSplitView.IsPaneOpen" Value="False" />
                     </VisualState.Setters>
                 </VisualState>
@@ -75,7 +75,7 @@
 
         <!-- The Top-level nav menu and content. -->
         <SplitView x:Name="RootSplitView" 
-                   DisplayMode="Inline"
+                   DisplayMode="CompactOverlay"
                    OpenPaneLength="256"
                    IsTabStop="false"
                    FlyoutBase.AttachedFlyout="{StaticResource StopFlyout}">

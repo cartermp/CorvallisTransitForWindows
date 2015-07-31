@@ -7,7 +7,7 @@ using Windows.Devices.Geolocation;
 
 namespace Corvallis_Transit.Model
 {
-    public class Route : NavMenuItem
+    public class Route
     {
         public string RouteNo { get; set; }
         public string Lable { get; set; }
