@@ -17,9 +17,7 @@ This code probably has some bugs and is absolutely *not* feature-complete nor pr
 
 ## Samples I found helpful
 
-- [ResizeView](https://github.com/Microsoft/Windows-universal-samples/tree/master/ResizeView/cs)
-- [mapcontrolsample](https://github.com/Microsoft/Windows-universal-samples/tree/master/mapcontrolsample)
-- [xaml_navigation](https://github.com/Microsoft/Windows-universal-samples/tree/master/xaml_navigation/CS)
+- [XamlUIBasics](https://github.com/Microsoft/Windows-universal-samples/tree/master/Samples/XamlUIBasics)
 
 ## Features (small in number as they are)
 
