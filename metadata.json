@@ -1,0 +1,6 @@
+{
+    "concepts":["uwp"],
+    "lang":"C#",
+    "title":"Corvallis Transit for Windows",
+    "description":"A basic port of Corvallis Transit to the UWP Platform."
+}
